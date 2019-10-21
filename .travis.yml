@@ -1,5 +1,5 @@
 language: go
 
 script:      # 执行的脚步，但是go默认会执行下面的这些命令的，所以可以不用写
-  - go env GO111MODULE=on
+  - export GO111MODULE="on"
   - go test ./...
