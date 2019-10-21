@@ -38,6 +38,8 @@ func main() {
 	router.ServeFiles("/men/*filepath", http.Dir("../web/dist/men"))
 	router.ServeFiles("/sale/*filepath", http.Dir("../web/dist/sale"))
 	router.ServeFiles("/women/*filepath", http.Dir("../web/dist/women"))
+
+	// product
 	router.GET("/products_images/:name", productsImages)
 
 	//auth
