@@ -35,6 +35,14 @@ func (u *UserService) Login(ctx context.Context, req model.AuthRequest, res *mod
 
 }
 
+func (u *UserService) Say(ctx context.Context, req model.SayRequest, res *model.SayResponse) error {
+	word := string(req)
+	*res = model.SayResponse(word)
+	return nil
+
+}
+
+// ========= internal func ================
 func checkPwd(request model.AuthRequest) (string, error) {
 	if request.UserName == "user" {
 		return uuid.GenerateUUID()

@@ -8,3 +8,6 @@ type AuthRequest struct {
 type AuthResponse struct {
 	Token string
 }
+
+type SayRequest string
+type SayResponse string
