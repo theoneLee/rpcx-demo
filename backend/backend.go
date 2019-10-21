@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"log"
 	"net/http"
 	"rpcx-demo/service/product/model"
+	model_user "rpcx-demo/service/user/model"
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
@@ -38,7 +40,52 @@ func main() {
 	router.ServeFiles("/women/*filepath", http.Dir("../web/dist/women"))
 	router.GET("/products_images/:name", productsImages)
 
+	//auth
+	router.POST("/auth", auth)
+
+	//user
+	router.GET("/user/:say", say)
+
 	log.Fatal(http.ListenAndServe(":8080", router))
+}
+
+func say(w http.ResponseWriter, request *http.Request, ps httprouter.Params) {
+	say := ps.ByName("say")
+	resp := new(model_user.SayResponse)
+	req := model_user.SayRequest(say)
+	err := xclient.Call(context.Background(), "Say", req, resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	resp_byte, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(resp_byte)
+}
+
+func auth(w http.ResponseWriter, request *http.Request, ps httprouter.Params) {
+	name := ps.ByName("name")
+	pwd := ps.ByName("password")
+	resp := &model_user.AuthResponse{}
+	req := model_user.AuthRequest{
+		UserName: name,
+		Password: pwd,
+	}
+	err := xclient.Call(context.Background(), "Login", req, resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	resp_byte, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(resp_byte)
+
 }
 
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
