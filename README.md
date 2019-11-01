@@ -3,6 +3,7 @@
 
 modify by rpcx-demo(you can search it in github)
 
-- step 1:start service 
-- step 2:start backend 
+- setp 0:install and run `etcd` 
+- step 1:run service and service2
+- step 2:run backend 
 - step 3:check backend.go and use it

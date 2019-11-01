@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/hashicorp/go-uuid"
 	"rpcx-demo/service/user/model"
 )
@@ -37,6 +38,7 @@ func (u *UserService) Login(ctx context.Context, req model.AuthRequest, res *mod
 
 func (u *UserService) Say(ctx context.Context, req model.SayRequest, res *model.SayResponse) error {
 	word := string(req)
+	fmt.Println(word)
 	*res = model.SayResponse(word)
 	return nil
 

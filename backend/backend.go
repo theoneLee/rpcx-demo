@@ -16,7 +16,11 @@ import (
 
 var (
 	addr  = flag.String("addr", ":8080", "http address")
-	paddr = flag.String("product-image-addr", "localhost:8972", "图片服务地址")
+	paddr = flag.String("product-image-addr", "localhost:8972", "图片服务地址") //点对点
+
+	//etcd
+	etcdAddr = flag.String("etcdAddr", "localhost:2379", "etcd address")
+	basePath = flag.String("base", "/rpcx_test", "prefix path")
 )
 
 var (
@@ -26,9 +30,13 @@ var (
 
 func main() {
 	d := client.NewPeer2PeerDiscovery("tcp@"+*paddr, "")
+	//d := client.NewEtcdV3Discovery(*basePath, "ProductImage", []string{*etcdAddr}, nil)
+
+	dEtcd := client.NewEtcdV3Discovery(*basePath, "auth", []string{*etcdAddr}, nil)
+
 	xclient = client.NewXClient("ProductImage", client.Failtry, client.RandomSelect, d, client.DefaultOption)
 	defer xclient.Close()
-	userclinet = client.NewXClient("auth", client.Failtry, client.RandomSelect, d, client.DefaultOption)
+	userclinet = client.NewXClient("auth", client.Failover, client.RandomSelect, dEtcd, client.DefaultOption)
 	defer userclinet.Close()
 
 	router := httprouter.New()
