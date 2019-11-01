@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 	"rpcx-demo/service/product/model"
-	model_user "rpcx-demo/service/user/model"
+	modeluser "rpcx-demo/service/user/model"
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
@@ -20,13 +20,16 @@ var (
 )
 
 var (
-	xclient client.XClient
+	xclient    client.XClient
+	userclinet client.XClient
 )
 
 func main() {
 	d := client.NewPeer2PeerDiscovery("tcp@"+*paddr, "")
 	xclient = client.NewXClient("ProductImage", client.Failtry, client.RandomSelect, d, client.DefaultOption)
 	defer xclient.Close()
+	userclinet = client.NewXClient("auth", client.Failtry, client.RandomSelect, d, client.DefaultOption)
+	defer userclinet.Close()
 
 	router := httprouter.New()
 	router.GET("/", index)
@@ -53,13 +56,14 @@ func main() {
 
 func say(w http.ResponseWriter, request *http.Request, ps httprouter.Params) {
 	say := ps.ByName("say")
-	resp := new(model_user.SayResponse)
-	req := model_user.SayRequest(say)
-	err := xclient.Call(context.Background(), "Say", req, resp)
+	resp := new(modeluser.SayResponse)
+	req := modeluser.SayRequest(say)
+	err := userclinet.Call(context.Background(), "Say", req, resp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	log.Println("*resp:", *resp)
 	resp_byte, err := json.Marshal(resp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -71,16 +75,17 @@ func say(w http.ResponseWriter, request *http.Request, ps httprouter.Params) {
 func auth(w http.ResponseWriter, request *http.Request, ps httprouter.Params) {
 	name := ps.ByName("name")
 	pwd := ps.ByName("password")
-	resp := &model_user.AuthResponse{}
-	req := model_user.AuthRequest{
+	resp := &modeluser.AuthResponse{}
+	req := modeluser.AuthRequest{
 		UserName: name,
 		Password: pwd,
 	}
-	err := xclient.Call(context.Background(), "Login", req, resp)
+	err := userclinet.Call(context.Background(), "Login", req, resp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	log.Println("*resp:", *resp)
 	resp_byte, err := json.Marshal(resp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
