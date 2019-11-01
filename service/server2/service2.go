@@ -24,7 +24,7 @@ func main() {
 
 	s := server.NewServer()
 
-	addRegistryPlugin2(s) //etcd
+	addRegistryPlugin(s) //etcd
 
 	s.RegisterName("ProductImage", product.New("./product/static"), "")
 	s.RegisterName("auth", user.New(), "") //user.New()返回一个服务对象，该服务对象的所有方法都会是允许rpc调用的，只要符合方法签名
@@ -34,7 +34,7 @@ func main() {
 	}
 }
 
-func addRegistryPlugin2(s *server.Server) {
+func addRegistryPlugin(s *server.Server) {
 	fmt.Println("*addr:", *addr2)
 	r := &serverplugin.EtcdV3RegisterPlugin{
 		ServiceAddress: "tcp@" + *addr2,
